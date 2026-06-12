@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soru Cevap</title>
+  <script>
+    (function(){
+      var theme = localStorage.getItem('soruCevapTheme') || localStorage.getItem('theme') || 'light';
+      document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f0f4f8;
+      --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --panel: #ffffff;
+      --panel-hover: #fafbfc;
+      --text: #1a202c;
+      --text-secondary: #4a5568;
+      --muted: #718096;
+      --border: #e2e8f0;
+      --border-light: #edf2f7;
+      --primary: #667eea;
+      --primary-hover: #5a67d8;
+      --primary-light: #ebf4ff;
+      --success: #48bb78;
+      --success-light: #f0fff4;
+      --danger: #f56565;
+      --danger-light: #fff5f5;
+      --warning: #ed8936;
+      --warning-light: #fffaf0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-full: 9999px;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-gradient: linear-gradient(135deg, #312e81 0%, #111827 100%);
+      --panel: #111827;
+      --panel-hover: #1f2937;
+      --text: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --muted: #94a3b8;
+      --border: #334155;
+      --border-light: #1e293b;
+      --primary: #818cf8;
+      --primary-hover: #6366f1;
+      --primary-light: #1e1b4b;
+      --success: #34d399;
+      --success-light: #052e1b;
+      --danger: #fb7185;
+      --danger-light: #3f121a;
+      --warning: #fbbf24;
+      --warning-light: #3b2604;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.35);
+      --shadow: 0 4px 20px rgba(0,0,0,0.35);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.45);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; border: none; background: none; }
+    img { max-width: 100%; display: block; }
+
+    /* Shell */
+    .shell { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* App Bar */
+    .appbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    [data-theme="dark"] .appbar {
+      background: rgba(15, 23, 42, 0.92);
+    }
+    .appbar-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-width: 0;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--text);
+    }
+    .brand svg {
+      width: 32px;
+      height: 32px;
+      color: var(--primary);
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+    .nav button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    .nav button:hover {
+      background: var(--panel-hover);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .nav button.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    .theme-btn {
+      min-width: 96px;
+    }
+    .nav svg { width: 18px; height: 18px; }
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--primary-light), var(--panel));
+      border: 1px solid rgba(102, 126, 234, 0.35);
+      border-radius: var(--radius-full);
+      padding: 8px 15px;
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: var(--shadow-sm);
+      width: fit-content;
+      max-width: 220px;
+      min-width: 0;
+      flex: 0 1 auto;
+    }
+    .user-chip svg { width: 16px; height: 16px; }
+    .user-chip span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    [data-theme="dark"] .user-chip {
+      background: linear-gradient(135deg, rgba(129, 140, 248, 0.22), rgba(17, 24, 39, 0.95));
+      border-color: rgba(129, 140, 248, 0.45);
+      color: #c7d2fe;
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 20px 48px;
+      min-width: 0;
+    }
+    .top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .top h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .top p {
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 15px;
+    }
+    #joinView .top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center;
+      text-align: center;
+    }
+    #joinView .top > div {
+      grid-column: 2;
+    }
+    #joinView .top > button {
+      grid-column: 3;
+      justify-self: end;
+    }
+
+    /* Grid Layouts */
+    .grid { display: grid; gap: 16px; }
+    .two { grid-template-columns: 1fr 1fr; }
+    .three { grid-template-columns: repeat(3, 1fr); }
+
+    /* Panels */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel-h {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--panel-hover);
+      min-width: 0;
+    }
+    .panel-h h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+    .panel-b { padding: 20px; }
+
+    /* Card List & Game Row */
+    .card-list { display: grid; gap: 12px; }
+    .game-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: all 0.2s ease;
+      min-width: 0;
+    }
+    #gamesList .game-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+      text-align: center;
+      gap: 10px;
+      padding: 16px 18px;
+      background:
+        linear-gradient(var(--panel), var(--panel)) padding-box,
+        linear-gradient(135deg, rgba(102,126,234,.35), rgba(72,187,120,.18)) border-box;
+      border: 1px solid transparent;
+    }
+    #gamesList .game-row > div:first-child {
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+      min-width: 0;
+      width: 100%;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    #gamesList .game-title {
+      font-size: 20px;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+      text-align: center;
+      line-height: 1.2;
+    }
+    #gamesList .game-title::after {
+      content: none;
+    }
+    #gamesList .meta {
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    #gamesList .badge {
+      padding: 8px 14px;
+      font-size: 13px;
+      background: var(--primary-light);
+      border-color: rgba(102,126,234,.28);
+      color: var(--primary);
+      min-width: 94px;
+      justify-content: center;
+    }
+    #gamesList .game-row > .row {
+      justify-content: center;
+      flex-wrap: wrap;
+      width: 100%;
+      gap: 10px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    #gamesList .game-row .btn:not(.icon-only) {
+      min-width: 170px;
+    }
+    .game-row:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow);
+    }
+    .game-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text);
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--panel-hover);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .badge svg { width: 14px; height: 14px; }
+    .badge.ok {
+      background: var(--success-light);
+      border-color: #c6f6d5;
+      color: #276749;
+    }
+    .badge.warn {
+      background: var(--warning-light);
+      border-color: #fbd38d;
+      color: #c05621;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 14px;
+      min-height: 42px;
+      transition: all 0.2s ease;
+    }
+    .btn svg { width: 18px; height: 18px; }
+    .btn:hover {
+      background: var(--panel-hover);
+      border-color: #cbd5e0;
+    }
+    .btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    .btn.primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+    .btn.good {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+    .btn.good:hover { background: #38a169; border-color: #38a169; }
+    .btn.bad {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: white;
+    }
+    .btn.bad:hover { background: #e53e3e; border-color: #e53e3e; }
+    .btn.full { width: 100%; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn.icon-only { width: 42px; padding: 0; }
+    .btn.icon-only svg { margin: 0; }
+
+    /* Form Fields */
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .field label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    textarea { min-height: 100px; resize: vertical; }
+    .input:focus, textarea:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    }
+
+    /* Auth View */
+    .auth-wrap {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: var(--bg-gradient);
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-wrap::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(30px, 30px); }
+    }
+    .auth {
+      width: min(440px, 100%);
+      position: relative;
+      z-index: 1;
+    }
+    .auth .panel {
+      box-shadow: var(--shadow-lg);
+    }
+    .auth .panel-b { padding: 32px; }
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .auth-logo svg {
+      width: 40px;
+      height: 40px;
+      color: var(--primary);
+    }
+    .auth-logo h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .auth .muted { margin-bottom: 24px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 13px; }
+    .err {
+      min-height: 20px;
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+    .success { color: var(--success); }
+
+    /* Tabs */
+    .hidden { display: none !important; }
+    .tabs {
+      display: flex;
+      background: var(--panel-hover);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      gap: 4px;
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    .tabs button {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--muted);
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .tabs button:hover { color: var(--text); background: rgba(255,255,255,0.5); }
+    [data-theme="dark"] .tabs button:hover { background: rgba(255,255,255,0.08); }
+    .tabs button.active {
+      background: var(--panel);
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+    .leader-tabs {
+      width: min(680px, 100%);
+      margin: 0 auto 16px;
+      justify-content: center;
+    }
+    .leader-tabs button {
+      flex: 1 1 0;
+      text-align: center;
+    }
+
+    /* Host Switch */
+    .host-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 16px;
+      padding: 4px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--panel-hover);
+    }
+    .host-switch button {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .host-switch button:hover { color: var(--text); }
+    .host-switch button.active {
+      background: var(--panel);
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+    .host-switch svg { width: 16px; height: 16px; }
+    .host-pane.hidden { display: none !important; }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+    }
+    .stat {
+      padding: 16px;
+      background: var(--panel-hover);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      text-align: center;
+    }
+    .stat span {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .stat strong {
+      display: block;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 4px;
+      overflow-wrap: anywhere;
+    }
+
+    /* QR Box */
+    .qr-box {
+      display: grid;
+      place-items: center;
+      background: var(--panel);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .qr-box img {
+      width: 240px;
+      height: 240px;
+      border-radius: var(--radius-sm);
+    }
+    .linkbox {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .linkbox input { font-size: 13px; }
+
+    /* Question Tile */
+    .question-tile {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      transition: all 0.2s ease;
+      min-width: 0;
+    }
+    .question-tile:hover { border-color: var(--primary); }
+    .question-tile.sent {
+      border-color: #9ae6b4;
+      background: var(--success-light);
+    }
+    .row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .between { justify-content: space-between; }
+    .grow { flex: 1; min-width: 0; }
+    .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .question-tile > .row.between > .row { flex: 0 0 auto; }
+
+    /* Options */
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .opt {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+    .opt:has(.correct-choice input:checked) {
+      border-color: var(--success);
+      box-shadow: 0 0 0 3px rgba(72,187,120,.14);
+    }
+    .opt.correct {
+      border-color: #9ae6b4;
+      background: var(--success-light);
+    }
+    .opt b {
+      display: inline-grid;
+      place-items: center;
+      min-width: 34px;
+      height: 28px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 6px;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+    .option-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .option-head label { margin: 0; }
+    .correct-choice {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: min(190px, 100%);
+      margin: 12px auto 0;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      background: var(--panel-hover);
+      color: var(--text-secondary);
+      font-weight: 800;
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+    .correct-choice:hover {
+      border-color: var(--success);
+      color: var(--text);
+    }
+    .correct-choice input {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      background: var(--panel);
+      box-shadow: inset 0 0 0 4px var(--panel);
+      transition: all .2s ease;
+      flex: 0 0 auto;
+    }
+    .correct-choice input:checked {
+      border-color: var(--success);
+      background: var(--success);
+    }
+    .correct-choice:has(input:checked) {
+      background: var(--success-light);
+      border-color: var(--success);
+      color: var(--success);
+    }
+    .add-option {
+      border: 2px dashed var(--border);
+      background: var(--panel);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      color: var(--primary);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .add-option:hover { border-color: var(--primary); background: var(--primary-light); }
+    .add-option:disabled { opacity: 0.5; color: var(--muted); cursor: not-allowed; }
+
+    /* Upload */
+    .upload {
+      border: 2px dashed var(--border);
+      background: var(--panel-hover);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .upload:hover { border-color: var(--primary); background: var(--primary-light); }
+    .upload-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .upload-title svg { width: 20px; height: 20px; color: var(--primary); }
+    .upload strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .upload-action {
+      background: var(--primary);
+      color: white;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .upload-loading {
+      display: grid;
+      gap: 10px;
+      border: 2px dashed var(--primary);
+      background: var(--primary-light);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      color: var(--primary);
+      font-weight: 800;
+    }
+    .upload-loading-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+    .upload-loading-head span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .upload-loading-head strong {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .upload-loading-bar {
+      height: 7px;
+      overflow: hidden;
+      border-radius: var(--radius-full);
+      background: rgba(102,126,234,.18);
+    }
+    .upload-loading-bar i {
+      display: block;
+      width: 38%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      animation: uploadMove 1s ease-in-out infinite;
+    }
+    @keyframes uploadMove {
+      0% { transform: translateX(-110%); }
+      100% { transform: translateX(270%); }
+    }
+    .preview {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--panel);
+    }
+    .preview img {
+      width: 100%;
+      max-height: 180px;
+      object-fit: cover;
+    }
+    .preview button { position: absolute; top: 8px; right: 8px; }
+
+    /* Leaderboard */
+    .leader-row {
+      display: grid;
+      grid-template-columns: 48px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      transition: all 0.2s ease;
+      min-width: 0;
+    }
+    .leader-row:hover { border-color: var(--primary); }
+    .rank {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-sm);
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 16px;
+    }
+    .leader-row:nth-child(1) .rank { background: linear-gradient(135deg, #ffd700, #ffb700); color: #7c5200; }
+    .leader-row:nth-child(2) .rank { background: linear-gradient(135deg, #e0e0e0, #b0b0b0); color: #505050; }
+    .leader-row:nth-child(3) .rank { background: linear-gradient(135deg, #cd7f32, #a0522d); color: #fff; }
+    .option-score {
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-score:hover { border-color: var(--primary); background: var(--primary-light); }
+    .option-score.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    }
+    .option-users { margin-top: 10px; display: grid; gap: 8px; }
+    .live {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 4px rgba(72, 187, 120, 0.2);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(72, 187, 120, 0.2); }
+      50% { box-shadow: 0 0 0 8px rgba(72, 187, 120, 0.1); }
+    }
+
+    /* Player Card */
+    .player-card { max-width: 640px; margin: 0 auto; }
+    .question-view .panel-h {
+      background: var(--panel);
+      color: var(--text);
+      padding: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      border-bottom: 0;
+    }
+    .question-view .panel-h > div:first-child {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+    }
+    .timer {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 74px;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      background: var(--panel-hover);
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .bar {
+      height: 6px;
+      background: var(--border-light);
+      border-radius: var(--radius-full) var(--radius-full) 0 0;
+      overflow: hidden;
+    }
+    .bar i {
+      display: block;
+      height: 100%;
+      background: var(--primary);
+      width: 100%;
+      transition: width 1s linear;
+      border-radius: var(--radius-full);
+    }
+    .answer-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .answer {
+      min-height: 58px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-weight: 600;
+      background: var(--panel);
+      color: var(--text);
+      padding: 13px 14px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      text-align: left;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .answer img {
+      grid-column: 2;
+      max-width: 100%;
+      justify-self: start;
+    }
+    .answer:hover {
+      border-color: var(--primary);
+      background: var(--panel-hover);
+      transform: none;
+    }
+    .answer:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .answer img { max-height: 100px; object-fit: contain; }
+    .answer b {
+      min-width: 42px;
+      height: auto;
+      display: inline-block;
+      background: transparent !important;
+      color: var(--text);
+      border-radius: 0;
+      font-size: 15px;
+      font-weight: 900;
+    }
+    .q-index {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--primary);
+      font-weight: 900;
+      margin-right: 6px;
+    }
+    .q-index svg {
+      width: 15px;
+      height: 15px;
+    }
+    .answer span { overflow-wrap: anywhere; }
+    .answer:nth-child(1) b,
+    .answer:nth-child(2) b,
+    .answer:nth-child(3) b,
+    .answer:nth-child(4) b { background: transparent; }
+    .open-answer { display: grid; gap: 12px; }
+    .open-answer textarea { min-height: 160px; }
+    .exam-paper {
+      background:
+        linear-gradient(var(--panel), var(--panel)) padding-box,
+        linear-gradient(135deg, rgba(102,126,234,.35), rgba(118,75,162,.18)) border-box;
+      border: 1px solid transparent;
+      box-shadow: 0 8px 26px rgba(15, 23, 42, .08);
+    }
+    .exam-paper .panel-b {
+      padding: 28px;
+      background: linear-gradient(to bottom, transparent 31px, rgba(148,163,184,.12) 32px);
+      background-size: 100% 32px;
+    }
+    .exam-title {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
+      gap: 12px;
+      margin-bottom: 22px;
+      line-height: 1.45;
+    }
+    .exam-no {
+      flex: 0 0 auto;
+      font-weight: 900;
+      color: var(--text);
+    }
+    .exam-title h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+    .exam-image {
+      width: 100%;
+      max-height: 240px;
+      object-fit: contain;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--panel-hover);
+    }
+    .exam-head-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 900;
+      letter-spacing: .01em;
+    }
+    .exam-head-label::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+    .modal-card {
+      width: min(640px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-card .question-view { box-shadow: none; border: 0; }
+    .modal-card .question-view .panel-h {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-card .question-view .panel-h > div:first-child {
+      display: flex;
+    }
+    .modal-card .panel { box-shadow: none; border: 0; }
+    .modal-card .answer { cursor: default; }
+    .modal-card .answer:hover { background: var(--panel); transform: none; }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    #hostView .top {
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: center;
+      text-align: center;
+      justify-items: center;
+    }
+    #hostView .top > div {
+      grid-column: 1;
+    }
+    #hostView .top > button {
+      grid-column: 1;
+      justify-self: center;
+      width: min(380px, 100%);
+    }
+    #hostView .top p {
+      display: none;
+    }
+    .host-switch {
+      width: min(760px, 100%);
+      margin-left: auto;
+      margin-right: auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .host-switch button {
+      justify-content: center;
+    }
+    #hostDetail > .panel-h {
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+    }
+    #hostDetail .tabs {
+      width: min(760px, 100%);
+      justify-content: center;
+    }
+    #hostDetail .tabs button {
+      flex: 1 1 0;
+      text-align: center;
+    }
+    .host-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    #createPanel {
+      width: min(620px, 100%);
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #createPanel .panel-b {
+      display: grid;
+      justify-items: center;
+    }
+    #createPanel .field {
+      width: 100%;
+    }
+    #createBtn {
+      width: min(420px, 100%);
+    }
+    .game-picker {
+      width: min(520px, 100%);
+      margin-top: 4px;
+    }
+    .toast-wrap {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 300;
+      display: grid;
+      gap: 10px;
+      width: min(360px, calc(100vw - 24px));
+    }
+    .toast {
+      padding: 13px 15px;
+      border: 1px solid #9ae6b4;
+      border-radius: var(--radius-sm);
+      background: var(--success-light);
+      color: var(--text);
+      box-shadow: var(--shadow-lg);
+      font-weight: 700;
+    }
+
+    /* Empty State */
+    .empty {
+      padding: 40px 24px;
+      text-align: center;
+      color: var(--muted);
+      background: var(--panel-hover);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .appbar-inner {
+        padding: 10px 12px;
+        flex-wrap: nowrap;
+        gap: 8px;
+      }
+      .brand span { display: none; }
+      .brand { flex: 0 0 auto; }
+      .user-chip {
+        order: 0;
+        flex: 0 1 auto;
+        max-width: min(34vw, 180px);
+        padding: 8px 10px;
+      }
+      .user-chip span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .nav {
+        width: auto;
+        flex: 0 0 auto;
+        justify-content: flex-end;
+        order: 0;
+        display: flex;
+        flex-wrap: nowrap;
+      }
+      .nav button {
+        width: auto;
+        min-width: 0;
+        padding: 9px 10px;
+      }
+      .nav button span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .main { padding: 16px; }
+      .two, .three { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr; }
+      .answer-grid, .options { grid-template-columns: 1fr; }
+      .top { flex-direction: column; gap: 12px; }
+      .top h1 { font-size: 24px; }
+      #joinView .top {
+        display: flex;
+        align-items: center;
+        text-align: center;
+      }
+      #joinView .top > div,
+      #joinView .top > button {
+        grid-column: auto;
+      }
+      #hostView .top {
+        display: flex;
+        align-items: center;
+        text-align: center;
+      }
+      #hostView .top > div,
+      #hostView .top > button {
+        grid-column: auto;
+      }
+      .top > .btn,
+      .top > button { width: 100%; }
+      .panel-h {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .panel-h .tabs { width: 100%; }
+      .tabs {
+        width: 100%;
+        scrollbar-width: none;
+      }
+      .tabs::-webkit-scrollbar { display: none; }
+      .host-switch {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .host-switch button {
+        justify-content: center;
+        min-width: 0;
+      }
+      .game-row {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .game-row > .row {
+        justify-content: stretch;
+        flex-wrap: wrap;
+      }
+      .game-row > .row .btn:not(.icon-only) {
+        flex: 1 1 160px;
+      }
+      .game-row > .row .btn.icon-only {
+        flex: 0 0 42px;
+      }
+      .question-tile > .row.between {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .question-tile > .row.between > .row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(42px, 1fr));
+        width: 100%;
+      }
+      .question-tile .btn.icon-only {
+        width: 100%;
+      }
+      .question-tile .truncate {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+      }
+      .leader-row {
+        grid-template-columns: 40px minmax(0, 1fr);
+      }
+      .leader-row strong,
+      .leader-row > span:last-child {
+        grid-column: 2;
+        justify-self: start;
+        word-break: break-word;
+      }
+      .linkbox { flex-direction: column; }
+      .linkbox .btn { width: 100%; }
+      .modal { padding: 12px; }
+      .modal-card { max-height: calc(100vh - 24px); }
+      .modal-actions {
+        flex-direction: column-reverse;
+      }
+      .modal-actions .btn {
+        width: 100%;
+      }
+      .toast-wrap {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        width: auto;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .appbar-inner { padding: 10px 12px; }
+      .nav button {
+        padding: 9px;
+        font-size: 0;
+        line-height: 1.15;
+      }
+      .nav button span {
+        display: none;
+      }
+      .nav svg { width: 17px; height: 17px; }
+      .theme-btn { min-width: 0; }
+      .user-chip {
+        font-size: 12px;
+        max-width: min(30vw, 130px);
+        padding: 8px;
+      }
+      .auth .panel-b { padding: 24px; }
+      .auth-logo h1 { font-size: 24px; }
+      .main { padding: 12px; }
+      .panel-b { padding: 14px; }
+      .panel-h { padding: 14px; }
+      .top h1 { font-size: 22px; }
+      .btn {
+        min-height: 40px;
+        padding: 9px 12px;
+      }
+      .btn.icon-only {
+        width: 40px;
+        min-width: 40px;
+      }
+      .stats {
+        gap: 8px;
+      }
+      .stat {
+        padding: 12px;
+      }
+      .stat strong {
+        font-size: 24px;
+      }
+      .question-tile {
+        padding: 12px;
+      }
+      .question-tile > .row.between > .row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .question-tile .btn.icon-only {
+        width: 100%;
+        min-width: 0;
+        padding: 9px 8px;
+        gap: 6px;
+      }
+      .question-tile .btn.icon-only::after {
+        content: attr(title);
+        display: inline;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .game-row > .row .btn.icon-only {
+        flex: 1 1 96px;
+        width: auto;
+        min-width: 0;
+        padding: 9px 8px;
+      }
+      .game-row > .row .btn.icon-only::after {
+        content: attr(title);
+        display: inline;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .upload {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .upload-action {
+        text-align: center;
+      }
+      .answer {
+        min-height: 86px;
+        padding: 12px;
+      }
+      .qr-box {
+        padding: 14px;
+      }
+      .qr-box img {
+        width: min(220px, 100%);
+        height: auto;
+      }
+      .row[style*="align-items:stretch"] {
+        flex-direction: column;
+      }
+      .row[style*="align-items:stretch"] .btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .nav button {
+        padding: 8px;
+      }
+      .question-tile > .row.between > .row {
+        grid-template-columns: repeat(2, minmax(42px, 1fr));
+      }
+      .question-tile .btn.icon-only::after {
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="authView" class="auth-wrap">
+    <section class="panel auth">
+      <div class="panel-b">
+        <div class="auth-logo"><i data-icon="blocks"></i><h1>Soru Cevap</h1></div>
+        <p class="muted"></p>
+        <div class="field"><label>Kullanici adi</label><input id="loginName" class="input" autocomplete="username" placeholder="Kullanici adiniz" oninput="toggleAdminPassword()" /></div>
+        <div id="adminPasswordField" class="field hidden"><label>Yonetici sifresi</label><input id="adminPassword" class="input" type="password" autocomplete="current-password" placeholder="Sifre" /></div>
+        <button id="loginBtn" class="btn primary full" onclick="login()"><i data-icon="log-in"></i>Giris yap</button>
+        <p class="small muted" style="margin-top:16px"></p>
+        <p id="authErr" class="err"></p>
+      </div>
+    </section>
+  </div>
+
+  <div id="appView" class="shell hidden">
+    <header class="appbar">
+      <div class="appbar-inner">
+        <button class="brand" onclick="setMode('join')" title="Ana ekran"><i data-icon="blocks"></i><span>Soru Cevap</span></button>
+        <div class="user-chip"><i data-icon="user"></i><span id="userName">-</span></div>
+      <nav class="nav">
+        <button id="navHost" class="hidden" onclick="setMode('host')"><i data-icon="layout"></i><span>Yonetim</span></button>
+        <button id="themeToggle" class="theme-btn" onclick="toggleTheme()" title="Tema"><i data-icon="moon"></i><span>Siyah</span></button>
+        <button onclick="logout()"><i data-icon="log-out"></i><span>Cikis</span></button>
+      </nav>
+      </div>
+    </header>
+
+    <main class="main">
+      <section id="joinView">
+        <div class="top"><div><h1>Aktif Oyunlar</h1><p>Bir oyun sec, sorular geldiginde cevapla.</p></div><button class="btn" onclick="loadActiveGames()"><i data-icon="refresh"></i>Yenile</button></div>
+        <div id="gamesList" class="card-list"></div><p id="gamesErr" class="err"></p>
+      </section>
+
+      <section id="hostView" class="hidden">
+        <div class="top"><div><h1>Yonetim Paneli</h1><p></p></div><button id="createTopBtn" class="btn primary" onclick="openCreate()"><i data-icon="plus"></i>Oyun olustur</button></div>
+        <div id="hostGuard" class="panel hidden"><div class="panel-b"><b>Bu hesap web'den oyun olusturamaz.</b><p class="muted">Yetkili kullanici adini backend ortam degiskeninde <code>WEB_HOST_USERNAME</code> veya <code>WEB_HOST_USERNAMES</code> ile belirleyebilirsin.</p></div></div>
+        <div id="createPanel" class="panel hidden" style="margin-bottom:16px"><div class="panel-h"><h2>Yeni oyun</h2><button class="btn icon-only" onclick="closeCreate()" title="Kapat"><i data-icon="x"></i></button></div><div class="panel-b"><div class="field"><label>Oyun adi</label><input id="gameTitle" class="input" placeholder="" /></div><button id="createBtn" class="btn primary" onclick="createGame()"><i data-icon="plus"></i>Olustur</button><p id="createErr" class="err"></p></div></div>
+        <div class="host-switch">
+          <button id="hostGamesBtn" class="active" onclick="setHostSection('games')"><i data-icon="list"></i>Oyunlarim</button>
+          <button id="hostPanelBtn" onclick="setHostSection('panel')"><i data-icon="layout"></i>Yonetim Paneli</button>
+        </div>
+        <div>
+          <section id="hostGamesPane" class="panel host-pane"><div class="panel-h"><h2>Oyunlarim</h2><button class="btn" onclick="loadMyGames()"><i data-icon="refresh"></i>Yenile</button></div><div class="panel-b"><div id="myGames" class="card-list"></div></div></section>
+          <section id="hostPanelPane" class="host-pane hidden"><section id="hostDetail" class="panel"><div class="panel-b empty">Yonetmek icin bir oyun sec.</div></section></section>
+        </div>
+      </section>
+
+      <section id="playerRoom" class="hidden player-card"></section>
+    </main>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    let webHostUsernames = ['example'];
+    const rememberedNameKey = 'rememberedPlayerName';
+    let token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    let currentUser = null, mode = 'join', socket = null, currentGameId = null, currentGameTitle = '', questionStartTime = null, timerInterval = null, questionNumber = 0, questionAnswered = false;
+    let hostSocket = null, selectedGame = null, selectedQuestions = [], sentQuestionIds = new Set(), statsPoll = null, hostTab = 'settings', hostSection = 'games', questionOptionIds = [], nextOptionId = 0, leaderView = 'overall', selectedScoreOption = '', editingQuestionId = null, myGamesCache = [], pendingConfirmAction = null;
+
+    const icons = {
+      blocks:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
+      user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>',
+      play:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 3 20 12 6 21 6 3"/></svg>',
+      layout:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>',
+      refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg>',
+      'log-in':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>',
+      'log-out':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>',
+      plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
+      x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+      moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6.5 6.5 0 0 0 8.8 8.8A9 9 0 1 1 12 3Z"/></svg>',
+      sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
+      users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+      list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+      send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>',
+      eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>',
+      pencil:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.8 2.8 0 0 1 4 4L8 20l-5 1 1-5Z"/><path d="m15 5 4 4"/></svg>',
+      trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>',
+      qr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h2v2h-2zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/></svg>',
+      image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>',
+      upload:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8 12 3 7 8"/><path d="M12 3v12"/></svg>',
+      trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M5 5H3v3a4 4 0 0 0 4 4M19 5h2v3a4 4 0 0 1-4 4"/></svg>'
+    };
+    function paintIcons(root=document){root.querySelectorAll('i[data-icon]').forEach(el=>{el.innerHTML=icons[el.dataset.icon]||'';});}
+    function applyTheme(theme){
+      const next=theme==='dark'?'dark':'light';
+      document.documentElement.dataset.theme=next;
+      localStorage.setItem('soruCevapTheme',next);
+      localStorage.setItem('theme',next);
+      const btn=document.getElementById('themeToggle');
+      if(btn){
+        btn.innerHTML=next==='dark'?'<i data-icon="sun"></i><span>Beyaz</span>':'<i data-icon="moon"></i><span>Siyah</span>';
+        paintIcons(btn);
+      }
+    }
+    function toggleTheme(){applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');}
+    function showToast(message){
+      let wrap=document.getElementById('toastWrap');
+      if(!wrap){document.body.insertAdjacentHTML('beforeend','<div id="toastWrap" class="toast-wrap"></div>');wrap=document.getElementById('toastWrap');}
+      const id='toast'+Date.now();
+      wrap.insertAdjacentHTML('beforeend',`<div id="${id}" class="toast">${esc(message)}</div>`);
+      setTimeout(()=>document.getElementById(id)?.remove(),2800);
+    }
+    function openConfirmModal({title='Onay', message='', okText='Tamam', danger=true, onConfirm}){
+      pendingConfirmAction=onConfirm;
+      document.getElementById('confirmModal')?.remove();
+      document.body.insertAdjacentHTML('beforeend',`<div id="confirmModal" class="modal" onclick="if(event.target===this)closeConfirmModal()"><div class="modal-card"><div class="panel"><div class="panel-h"><h2>${esc(title)}</h2></div><div class="panel-b"><p class="muted">${esc(message)}</p><div class="modal-actions"><button class="btn" onclick="closeConfirmModal()">Iptal</button><button id="confirmModalOk" class="btn ${danger?'bad':'primary'}" onclick="runConfirmAction()">${esc(okText)}</button></div></div></div></div></div>`);
+    }
+    function closeConfirmModal(){pendingConfirmAction=null;document.getElementById('confirmModal')?.remove();}
+    async function runConfirmAction(){const action=pendingConfirmAction;pendingConfirmAction=null;document.getElementById('confirmModal')?.remove();if(action)await action();}
+    function isAdminLoginName(name){return String(name||'').trim().toLowerCase()==='example';}
+    function toggleAdminPassword(){const show=isAdminLoginName(val('loginName'));document.getElementById('adminPasswordField')?.classList.toggle('hidden',!show);if(!show){const pass=document.getElementById('adminPassword');if(pass)pass.value='';}}
+
+    async function login(){
+      const name = val('loginName').trim(); setErr('authErr','');
+      if(name.length < 2) return setErr('authErr','En az 2 karakter giriniz');
+      if(isAdminLoginName(name) && !val('adminPassword')){toggleAdminPassword();document.getElementById('adminPassword')?.focus();return setErr('authErr','Yonetici sifresini girin');}
+      if(isAdminLoginName(name) && val('adminPassword') !== '1024') return setErr('authErr','Yonetici sifresi hatali');
+      btn('loginBtn', true, 'Giris yapiliyor');
+      const res = await apiFetch('/api/auth/login','POST',{name,password:isAdminLoginName(name)?val('adminPassword'):''});
+      btn('loginBtn', false, '<i data-icon="log-in"></i>Giris yap'); paintIcons();
+      if(!res.ok) return setErr('authErr',(await res.json()).message || 'Giris yapilamadi');
+      const d = await res.json(); localStorage.setItem(rememberedNameKey, name); saveToken(d.token, true); currentUser = d.user; bootApp();
+    }
+    function bootApp(){document.getElementById('authView').classList.add('hidden');document.getElementById('appView').classList.remove('hidden');text('userName', currentUser.name);document.getElementById('navHost').classList.toggle('hidden',!canHost());setMode('join');loadAll();}
+    function setMode(next){if(next==='host'&&!canHost())next='join';mode=next;['joinView','hostView','playerRoom'].forEach(id=>document.getElementById(id).classList.add('hidden'));document.getElementById(next==='join'?'joinView':'hostView').classList.remove('hidden');document.getElementById('navHost')?.classList.toggle('active',next==='host');if(next==='host') loadMyGames();}
+    function logout(){clearSession();location.reload();}
+    async function loadAll(){await loadActiveGames(); if(mode==='host') await loadMyGames();}
+
+    async function loadActiveGames(){
+      const list = document.getElementById('gamesList'); list.innerHTML = '<div class="empty">Oyunlar yukleniyor...</div>'; setErr('gamesErr','');
+      const res = await apiFetch('/api/games/active','GET'); if(!res.ok){list.innerHTML='';return setErr('gamesErr','Oyunlar yuklenemedi');}
+      const {games} = await res.json();
+      if(!games.length){list.innerHTML='<div class="empty">Aktif oyun yok.</div>';return;}
+      list.innerHTML = games.map(g => {
+        const del = canHost() ? `<button class="btn icon-only bad" onclick="deleteActiveGame('${g.id}','${escAttr(g.title)}')" title="Oyunu sil"><i data-icon="trash"></i></button>` : '';
+        return gameRow(g, `<button class="btn primary" onclick="joinGame('${g.id}','${escAttr(g.title)}')"><i data-icon="play"></i>Katil</button>${del}`);
+      }).join('');
+      paintIcons(list);
+    }
+    function gameRow(g, action){
+      return `<div class="game-row"><div><div class="game-title">${esc(g.title)}</div><div class="meta"><span class="badge"><i data-icon="users"></i>${g.participantCount||0}</span><span class="badge"><i data-icon="list"></i>${g.questionCount||0} soru</span></div></div><div class="row">${action}</div></div>`;
+    }
+    async function joinGame(gameId,title){
+      currentGameId=gameId; currentGameTitle=title; questionNumber=0; document.getElementById('joinView').classList.add('hidden'); document.getElementById('hostView').classList.add('hidden'); document.getElementById('playerRoom').classList.remove('hidden');
+      renderPlayerWait(title,'Oyuna baglaniliyor...');
+      const res = await apiFetch('/api/games/join','POST',{gameId}); const d = await res.json(); if(!res.ok){setMode('join');return setErr('gamesErr',d.message);}
+      connectPlayer(gameId,title);
+    }
+    async function deleteActiveGame(gameId,title){
+      if(!canHost())return;
+      openConfirmModal({
+        title:'Oyunu sil',
+        message:`"${title}" oyunu silinsin mi?`,
+        okText:'Sil',
+        onConfirm:async()=>{
+          const res=await apiFetch(`/api/games/${gameId}`,'DELETE');
+          if(!res.ok)return setErr('gamesErr',(await res.json()).message||'Oyun silinemedi');
+          showToast('Oyun silindi');
+          if(selectedGame?._id===gameId){selectedGame=null;selectedQuestions=[];document.getElementById('hostDetail').innerHTML='<div class="panel-b empty">Yonetmek icin bir oyun sec.</div>';}
+          await loadActiveGames();
+          if(mode==='host') await loadMyGames();
+        }
+      });
+    }
+    function connectPlayer(gameId,title){
+      if(socket) socket.disconnect(); socket = io({transports:['polling','websocket']});
+      socket.on('connect',()=>socket.emit('player:join',{gameId,userId:currentUser.id,username:currentUser.name}));
+      socket.on('game:state',s=>renderPlayerWait(title, s.answerOpen ? 'Cevap verme acik. Soru bekleniyor.' : 'Kurucunun oyunu baslatmasi bekleniyor.'));
+      socket.on('game:started',()=>renderPlayerWait(title,'Oyun basladi. Soru bekleniyor.'));
+      socket.on('question:new',q=>{questionNumber++;renderQuestion(q);});
+      socket.on('answer:result',()=>{clearInterval(timerInterval);renderPlayerWait('Cevap alindi','Siradaki soru bekleniyor.');});
+      socket.on('game:end',lb=>renderFinal(lb));
+      socket.on('error',d=>{setMode('join');setErr('gamesErr',d.message);});
+    }
+    function renderPlayerWait(title,msg){document.getElementById('playerRoom').innerHTML=`<section class="panel"><div class="panel-b" style="text-align:center;padding:48px 24px"><h1 style="margin-bottom:8px">${esc(title)}</h1><p class="muted" style="margin-bottom:20px">${esc(msg)}</p><button class="btn" onclick="leavePlayer()"><i data-icon="x"></i>Ayril</button></div></section>`;paintIcons(document.getElementById('playerRoom'));}
+    function leavePlayer(){if(socket) socket.disconnect();clearInterval(timerInterval);document.getElementById('playerRoom').classList.add('hidden');setMode('join');}
+    function renderQuestion(q){
+      const room=document.getElementById('playerRoom');
+      questionAnswered=false;
+      room.innerHTML=`<section class="panel question-view exam-paper"><div class="panel-h"><div><b class="exam-head-label">Soru ${questionNumber}-)</b><span id="qTimer" class="timer">${q.timeLimit} sn</span></div><div class="bar"><i id="timerBar"></i></div></div><div class="panel-b">${q.imageUrl?`<img class="exam-image" src="${escAttr(q.imageUrl)}">`:''}<div class="exam-title"><span class="exam-no">${questionNumber}-)</span><h2>${esc(q.text||'')}</h2></div><div id="qOptions" class="answer-grid"></div><p id="qErr" class="err"></p></div></section>`;
+      const opts=document.getElementById('qOptions'), imgs=q.optionImages||[]; questionStartTime=Date.now();
+      if(q.questionType==='open_text'){
+        opts.className='open-answer';
+        opts.innerHTML=`<textarea id="openAnswerText" placeholder="Cevabinizi yazin"></textarea><button id="openAnswerBtn" class="btn primary full" onclick="submitOpenAnswer('${q.id}')">Cevabi gonder</button>`;
+      }else{
+        (q.options||[]).forEach((opt,i)=>{opts.insertAdjacentHTML('beforeend',`<button class="answer" onclick="submitAnswer(${i},'${q.id}')"><b>${optionLabel(i)}-)</b>${imgs[i]?`<img src="${escAttr(imgs[i])}">`:''}<span>${esc(opt||'')}</span></button>`);});
+      }
+      let remaining=q.timeLimit; timerInterval=setInterval(()=>{remaining--;text('qTimer',remaining+' sn');document.getElementById('timerBar').style.width=Math.max(0,remaining/q.timeLimit*100)+'%';if(remaining<=0){clearInterval(timerInterval);disableAnswers();if(!questionAnswered)renderPlayerWait(currentGameTitle||'Sure bitti','Sure doldu. Siradaki soru bekleniyor.');}},1000);
+    }
+    function submitAnswer(idx,questionId){questionAnswered=true;clearInterval(timerInterval);disableAnswers();socket.emit('player:answer',{gameId:currentGameId,questionId,selectedIndex:idx,timeTaken:Date.now()-questionStartTime,userId:currentUser.id,username:currentUser.name});}
+    function submitOpenAnswer(questionId){const answerText=val('openAnswerText').trim();if(!answerText)return setErr('qErr','Cevap yazin');questionAnswered=true;clearInterval(timerInterval);disableAnswers();socket.emit('player:answer',{gameId:currentGameId,questionId,answerText,timeTaken:Date.now()-questionStartTime,userId:currentUser.id,username:currentUser.name});}
+    function disableAnswers(){document.querySelectorAll('.answer,#openAnswerBtn').forEach(b=>b.disabled=true);const ta=document.getElementById('openAnswerText');if(ta)ta.disabled=true;}
+    function renderFinal(lb){document.getElementById('playerRoom').innerHTML=`<section class="panel"><div class="panel-h"><h2>Final Siralamasi</h2></div><div class="panel-b card-list">${(lb||[]).map((p,i)=>`<div class="leader-row"><span class="rank">${i+1}</span><b>${esc(p.username)}</b><strong>${p.score} dogru</strong></div>`).join('')||'<div class="empty">Siralama yok</div>'}</div></section>`;}
+
+    function canHost(){return webHostUsernames.map(n=>n.toLowerCase()).includes((currentUser?.name||'').toLowerCase());}
+    function setHostSection(section){
+      hostSection=section;
+      document.getElementById('hostGamesPane')?.classList.toggle('hidden',section!=='games');
+      document.getElementById('hostPanelPane')?.classList.toggle('hidden',section!=='panel');
+      document.getElementById('hostGamesBtn')?.classList.toggle('active',section==='games');
+      document.getElementById('hostPanelBtn')?.classList.toggle('active',section==='panel');
+    }
+    function openCreate(){document.getElementById('createPanel').classList.remove('hidden');document.getElementById('createTopBtn')?.classList.add('hidden');document.getElementById('gameTitle')?.focus();}
+    function closeCreate(){document.getElementById('createPanel').classList.add('hidden');if(!myGamesCache.some(g=>g.status!=='ended'))document.getElementById('createTopBtn')?.classList.remove('hidden');}
+    async function createGame(){
+      const title=val('gameTitle').trim(); setErr('createErr',''); if(!title)return setErr('createErr','Oyun adi zorunludur');
+      btn('createBtn',true,'Olusturuluyor'); const res=await apiFetch('/api/games/create','POST',{title},{'x-web-host':'1'}); const d=await res.json(); btn('createBtn',false,'<i data-icon="plus"></i>Olustur'); paintIcons();
+      if(!res.ok)return setErr('createErr',d.message||'Oyun olusturulamadi'); document.getElementById('gameTitle').value=''; closeCreate(); showToast('Oyun basariyla olusturuldu'); await loadMyGames(); await selectGame(d.game._id||d.game.id);
+    }
+    async function loadMyGames(){
+      if(!canHost()){setMode('join');return;}
+      document.getElementById('hostGuard').classList.add('hidden');
+      const box=document.getElementById('myGames'); box.innerHTML='<div class="empty">Yukleniyor...</div>';
+      const res=await apiFetch('/api/games/my','GET'); if(!res.ok){box.innerHTML='<div class="empty">Oyunlarim yuklenemedi.</div>';return;}
+      const {games}=await res.json();
+      myGamesCache=games.filter(g=>g.status!=='ended').sort((a,b)=>String(a.title||'').localeCompare(String(b.title||''),'tr'));
+      const hasActiveGame=myGamesCache.length>0;
+      document.getElementById('createTopBtn')?.classList.toggle('hidden',hasActiveGame);
+      if(hasActiveGame) closeCreate();
+      if(!myGamesCache.length){
+        box.innerHTML='<div class="empty">Aktif oyun yok.</div>';
+        if(selectedGame?.status==='ended'){
+          selectedGame=null;
+          selectedQuestions=[];
+          document.getElementById('hostDetail').innerHTML='<div class="panel-b empty">Aktif oyun yok. Yeni oyun olusturabilirsin.</div>';
+        }
+        return;
+      }
+      box.innerHTML=myGamesCache.map(g=>gameRow({id:g._id,title:g.title,status:g.status,participantCount:g.participants?.length||0,questionCount:'?'},`<button class="btn icon-only" onclick="openEditGameModal('${g._id}')" title="Duzenle"><i data-icon="pencil"></i></button><button class="btn" onclick="selectGame('${g._id}')"><i data-icon="layout"></i>Yonet</button><button class="btn icon-only bad" onclick="deleteActiveGame('${g._id}','${escAttr(g.title)}')" title="Sil"><i data-icon="trash"></i></button>`)).join(''); paintIcons(box);
+      const preferred=myGamesCache.find(g=>g.status!=='ended')||myGamesCache[0];
+      if(mode==='host' && (!selectedGame || !myGamesCache.some(g=>g._id===selectedGame._id)) && preferred) await selectGame(preferred._id);
+    }
+    async function selectGame(id){
+      const res=await apiFetch(`/api/games/${id}`,'GET'); if(!res.ok)return;
+      const d=await res.json(); selectedGame=d.game; selectedQuestions=d.questions||[]; sentQuestionIds=new Set(); connectHost(id); renderHostDetail(); setHostSection('panel');
+      clearInterval(statsPoll); statsPoll=setInterval(refreshStats,4000); refreshStats();
+    }
+    function gamePickerHtml(){
+      if(myGamesCache.length<=1)return '';
+      return `<select class="input game-picker" onchange="selectGame(this.value)">${myGamesCache.map(g=>`<option value="${g._id}" ${selectedGame?._id===g._id?'selected':''}>${esc(g.title)}${g.status==='ended'?' (bitti)':''}</option>`).join('')}</select>`;
+    }
+    function openEditGameModal(id){
+      const game=myGamesCache.find(g=>g._id===id)||selectedGame;
+      if(!game)return;
+      document.getElementById('editGameModal')?.remove();
+      document.body.insertAdjacentHTML('beforeend',`<div id="editGameModal" class="modal" onclick="if(event.target===this)closeEditGameModal()"><div class="modal-card"><div class="panel"><div class="panel-h"><h2>Oyun adini duzenle</h2></div><div class="panel-b"><div class="field"><label>Oyun adi</label><input id="editGameTitle" class="input" value="${escAttr(game.title)}"></div><div class="modal-actions"><button class="btn" onclick="closeEditGameModal()">Iptal</button><button class="btn primary" onclick="saveGameTitle('${game._id}')"><i data-icon="pencil"></i>Kaydet</button></div><p id="editGameErr" class="err"></p></div></div></div></div>`);
+      paintIcons(document.getElementById('editGameModal'));
+      document.getElementById('editGameTitle')?.focus();
+    }
+    function closeEditGameModal(){document.getElementById('editGameModal')?.remove();}
+    async function saveGameTitle(id){
+      const title=val('editGameTitle').trim();
+      if(!title)return setErr('editGameErr','Oyun adi zorunludur');
+      const res=await apiFetch(`/api/games/${id}`,'PATCH',{title});
+      const d=await res.json();
+      if(!res.ok)return setErr('editGameErr',d.message||'Oyun adi kaydedilemedi');
+      closeEditGameModal();
+      showToast('Oyun adi guncellendi');
+      await loadMyGames();
+      if(selectedGame?._id===id) await selectGame(id);
+    }
+    function connectHost(id){ if(hostSocket) hostSocket.disconnect(); hostSocket=io({transports:['polling','websocket']}); hostSocket.on('connect',()=>hostSocket.emit('host:join',{gameId:id,userId:currentUser.id})); hostSocket.on('host:stats',refreshStats); hostSocket.on('leaderboard:update',()=>{if(hostTab==='leader')renderHostDetail();}); hostSocket.on('question:scores',()=>{if(hostTab==='leader')renderHostDetail();}); }
+    function renderHostDetail(){
+      const g=selectedGame; if(!g)return; const link=location.origin; const qr=`https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(link)}`;
+      document.getElementById('hostDetail').innerHTML=`<div class="panel-h"><h2>${esc(g.title)}</h2>${gamePickerHtml()}<div class="tabs"><button class="${hostTab==='settings'?'active':''}" onclick="hostTab='settings';renderHostDetail()">Ayarlar</button><button class="${hostTab==='qr'?'active':''}" onclick="hostTab='qr';renderHostDetail()">QR</button><button class="${hostTab==='question'?'active':''}" onclick="hostTab='question';renderHostDetail()">Soru</button><button class="${hostTab==='leader'?'active':''}" onclick="hostTab='leader';renderHostDetail()">Siralama</button></div></div><div class="panel-b" id="hostBody"></div>`;
+      paintIcons(document.getElementById('hostDetail'));
+      if(hostTab==='settings') renderSettings(); if(hostTab==='qr') body(`<div class="qr-box"><img src="${qr}" alt="Katilim QR kodu"><div class="linkbox"><input class="input" value="${escAttr(link)}" readonly><button class="btn" onclick="navigator.clipboard?.writeText('${escAttr(link)}')">Kopyala</button></div><p class="small muted" style="margin-top:12px">Katilimcilar bu adresi veya QR kodu acarak oyuna katilir.</p></div>`);
+      if(hostTab==='question') renderQuestionForm(); if(hostTab==='leader') renderLeaderboards();
+    }
+    function renderSettings(){
+      const g=selectedGame, started=g.status==='started';
+      body(`<div class="stats"><div class="stat"><span>Oyun adi</span><strong>${esc(g.title)}</strong></div><div class="stat"><span>Durum</span><strong>${statusText(g.status)}</strong></div><div class="stat"><span>Katilimci</span><strong id="statPeople">${g.participants?.length||0}</strong></div><div class="stat"><span>Soru</span><strong>${selectedQuestions.length}</strong></div></div><div class="host-actions">${g.status==='waiting'?`<button class="btn good" onclick="startGame()"><i data-icon="play"></i>Oyunu baslat</button>`:''}${started?`<button class="btn" onclick="toggleAnswer()">${g.answerOpen?'Cevabi kapat':'Cevabi ac'}</button>`:''}<button class="btn bad" onclick="openEndGameModal()"><i data-icon="x"></i>Oyunu bitir</button></div><h3 style="margin:24px 0 16px;font-size:18px;text-align:center">Sorular</h3><div class="card-list">${selectedQuestions.map((q,i)=>questionTile(q,i)).join('')||'<div class="empty">Henuz soru yok.</div>'}</div>`); paintIcons(document.getElementById('hostBody'));
+    }
+    function questionTile(q,i){const sent=sentQuestionIds.has(q._id), isOpen=q.questionType==='open_text';return `<div class="question-tile ${sent?'sent':''}"><div class="row between"><div class="grow truncate"><b><span class="q-index"><i data-icon="list"></i>${i+1}-)</span>${esc(q.text||'(Resimli soru)')}</b><div class="small muted">${q.timeLimit} sn - ${isOpen?'Acik uclu':'Sikli'}</div></div><div class="row"><button class="btn icon-only" onclick="previewQuestion('${q._id}')" title="Onizle"><i data-icon="eye"></i></button><button class="btn icon-only" onclick="editQuestion('${q._id}')" title="Duzenle"><i data-icon="pencil"></i></button><button class="btn icon-only" ${sent?'disabled':''} onclick="sendQuestion('${q._id}')" title="Yayinla"><i data-icon="send"></i></button><button class="btn icon-only" onclick="deleteQuestion('${q._id}')" title="Sil"><i data-icon="trash"></i></button></div></div></div>`;}
+    function previewQuestion(id){const q=selectedQuestions.find(x=>x._id===id);if(!q)return;document.getElementById('questionPreviewModal')?.remove();const qIndex=selectedQuestions.findIndex(x=>x._id===id)+1;const img=q.imageUrl?`<img class="exam-image" src="${escAttr(q.imageUrl)}">`:'';const bodyHtml=q.questionType==='open_text'?`<div class="open-answer"><textarea disabled placeholder="Cevap alani"></textarea><button class="btn primary full" disabled>Cevabi gonder</button></div>`:`<div class="answer-grid">${(q.options||[]).map((opt,i)=>`<button class="answer" disabled><b>${optionLabel(i)}-)</b>${(q.optionImages||[])[i]?`<img src="${escAttr(q.optionImages[i])}">`:''}<span>${esc(opt||'')}</span></button>`).join('')}</div>`;document.body.insertAdjacentHTML('beforeend',`<div id="questionPreviewModal" class="modal" onclick="if(event.target===this)this.remove()"><div class="modal-card"><section class="panel question-view exam-paper"><div class="panel-h"><div><b class="exam-head-label">Onizleme</b><span class="timer">${q.timeLimit} sn</span></div><button class="btn icon-only" onclick="document.getElementById('questionPreviewModal').remove()" title="Kapat"><i data-icon="x"></i></button></div><div class="panel-b">${img}<div class="exam-title"><span class="exam-no">${qIndex}-)</span><h2>${esc(q.text||'')}</h2></div>${bodyHtml}</div></section></div></div>`);paintIcons(document.getElementById('questionPreviewModal'));}
+    function editQuestion(id){editingQuestionId=id;hostTab='question';renderHostDetail();document.getElementById('hostDetail')?.scrollIntoView({behavior:'smooth',block:'start'});}
+    async function startGame(){if(!selectedQuestions.length)return alert('Once en az 1 soru ekleyin.');await apiFetch(`/api/games/${selectedGame._id}`,'PATCH',{status:'started'});await apiFetch(`/api/games/${selectedGame._id}/broadcast-start`,'POST');selectedGame.status='started';selectedGame.answerOpen=false;renderHostDetail();setTimeout(()=>sendQuestion(selectedQuestions[0]._id,true),500);}
+    async function toggleAnswer(){const next=!selectedGame.answerOpen;await apiFetch(`/api/games/${selectedGame._id}`,'PATCH',{answerOpen:next});hostSocket?.emit('host:toggleAnswer',{gameId:selectedGame._id,answerOpen:next});selectedGame.answerOpen=next;renderHostDetail();}
+    async function sendQuestion(id,silent=false){await apiFetch(`/api/games/${selectedGame._id}`,'PATCH',{answerOpen:true});hostSocket?.emit('host:toggleAnswer',{gameId:selectedGame._id,answerOpen:true});const res=await apiFetch(`/api/games/${selectedGame._id}/broadcast-question`,'POST',{questionId:id});if(res.ok){sentQuestionIds.add(id);selectedGame.answerOpen=true;}else if(!silent) alert((await res.json()).message||'Soru gonderilemedi');renderHostDetail();}
+    async function deleteQuestion(id){
+      openConfirmModal({
+        title:'Soruyu sil',
+        message:'Soru silinsin mi?',
+        okText:'Sil',
+        onConfirm:async()=>{
+          await apiFetch(`/api/games/${selectedGame._id}/questions/${id}`,'DELETE');
+          showToast('Soru silindi');
+          await selectGame(selectedGame._id);
+        }
+      });
+    }
+    function openEndGameModal(){
+      document.getElementById('endGameModal')?.remove();
+      document.body.insertAdjacentHTML('beforeend',`<div id="endGameModal" class="modal" onclick="if(event.target===this)closeEndGameModal()"><div class="modal-card"><div class="panel"><div class="panel-h"><h2>Oyunu bitir</h2></div><div class="panel-b"><p class="muted">Bu oyunu bitirmek istiyor musun?</p><div class="modal-actions"><button class="btn" onclick="closeEndGameModal()">Iptal</button><button id="confirmEndGameBtn" class="btn bad" onclick="endGame()"><i data-icon="x"></i>Tamam, bitir</button></div></div></div></div></div>`);
+      paintIcons(document.getElementById('endGameModal'));
+    }
+    function closeEndGameModal(){document.getElementById('endGameModal')?.remove();}
+    async function endGame(){
+      const endedGameId=selectedGame?._id;
+      const btnEl=document.getElementById('confirmEndGameBtn');
+      if(btnEl){btnEl.disabled=true;btnEl.innerHTML='Bitiriliyor...';}
+      const res=await apiFetch(`/api/games/${endedGameId}/end`,'POST');
+      closeEndGameModal();
+      if(!res.ok){showToast('Oyun bitirilemedi');return;}
+      showToast('Oyun bitirildi');
+      if(selectedGame?._id===endedGameId){
+        selectedGame=null;
+        selectedQuestions=[];
+        document.getElementById('hostDetail').innerHTML='<div class="panel-b empty">Aktif oyun yok. Yeni oyun olusturabilirsin.</div>';
+      }
+      await loadMyGames();
+      await loadActiveGames();
+      setHostSection('games');
+    }
+    function renderQuestionForm(){
+      const edit=selectedQuestions.find(q=>q._id===editingQuestionId), editType=edit?.questionType==='open_text'?'open_text':'multiple_choice', optionCount=editType==='multiple_choice'?Math.max(2,(edit?.options||[]).length):4;
+      questionOptionIds=Array.from({length:optionCount},(_,i)=>i); nextOptionId=optionCount;
+      body(`${edit?`<div class="badge warn" style="margin-bottom:16px">Duzenleme modu</div>`:''}<div class="field"><label>Soru tipi</label><select id="questionType" onchange="toggleQuestionType()"><option value="multiple_choice" ${editType==='multiple_choice'?'selected':''}>Sikli soru</option><option value="open_text" ${editType==='open_text'?'selected':''}>Acik uclu</option></select></div><div class="field"><label>Soru metni</label><textarea id="qText" placeholder="Soruyu yazin">${esc(edit?.text||'')}</textarea></div><div id="qImageBox">${edit?.imageUrl?previewHtml(edit.imageUrl,'Soru dosyasi','qImage'):uploadBox('Soru dosyasi','qImage')}</div><div id="choiceFields"><div class="options" id="optionList">${questionOptionIds.map((id,i)=>optionBox(id,i)).join('')}</div><button id="addOptionBtn" class="add-option" onclick="addOption()" type="button"><i data-icon="plus"></i>Sik ekle</button></div><div class="field" style="margin-top:16px"><label>Sure</label><select id="timeLimit">${[15,20,30,45,60].map(t=>`<option value="${t}" ${(edit?.timeLimit||30)===t?'selected':''}>${t} saniye</option>`).join('')}</select></div><div class="row" style="align-items:stretch;gap:8px"><button class="btn primary full" onclick="addQuestion()"><i data-icon="${edit?'pencil':'plus'}"></i>${edit?'Soruyu kaydet':'Soru ekle'}</button>${edit?`<button class="btn" onclick="cancelEditQuestion()">Vazgec</button>`:''}</div><p id="questionErr" class="err"></p>`);
+      window.qImage=edit?.imageUrl||'';
+      questionOptionIds.forEach((id,i)=>{document.getElementById('opt'+id).value=(edit?.options||[])[i]||'';window['optImage'+id]=(edit?.optionImages||[])[i]||'';const radio=document.querySelector(`input[name="correct"][value="${id}"]`);if(radio)radio.checked=(edit?.correctIndex||0)===i;const box=document.getElementById('optImageBox'+id);if(window['optImage'+id]&&box)box.innerHTML=previewHtml(window['optImage'+id],'Secenek dosyasi','optImage'+id);});
+      paintIcons(document.getElementById('hostBody')); updateOptionControls(); toggleQuestionType();
+    }
+    function cancelEditQuestion(){editingQuestionId=null;renderHostDetail();}
+    function toggleQuestionType(){document.getElementById('choiceFields')?.classList.toggle('hidden',val('questionType')==='open_text');}
+    function optionLabel(i){return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[i]||String(i+1);}
+    function optionBox(id,index){return `<div class="opt option-card" data-option-id="${id}"><div class="option-head"><label class="small"><b class="opt-letter">${optionLabel(index)}-)</b></label><button class="btn icon-only bad remove-option" onclick="removeOption(${id})" type="button" title="Sikki sil"><i data-icon="trash"></i></button></div><div class="field"><input class="input option-text" id="opt${id}" placeholder="Secenek metni"></div><div id="optImageBox${id}">${uploadBox('Secenek dosyasi','optImage'+id)}</div><label class="correct-choice small"><input type="radio" name="correct" value="${id}" ${index===0?'checked':''}> Dogru cevap</label></div>`;}
+    function updateOptionControls(){const cards=[...document.querySelectorAll('#optionList .option-card')];cards.forEach((card,i)=>{card.querySelector('.opt-letter').textContent=`${optionLabel(i)}-)`;const remove=card.querySelector('.remove-option');if(remove)remove.disabled=cards.length<=2;});const add=document.getElementById('addOptionBtn');if(add)add.disabled=cards.length>=10;if(cards.length&&!document.querySelector('input[name="correct"]:checked'))cards[0].querySelector('input[name="correct"]').checked=true;paintIcons(document.getElementById('hostBody'));}
+    function addOption(){const list=document.getElementById('optionList');if(!list||list.children.length>=10)return;const id=nextOptionId++;questionOptionIds.push(id);list.insertAdjacentHTML('beforeend',optionBox(id,list.children.length));updateOptionControls();}
+    function removeOption(id){const list=document.getElementById('optionList');if(!list||list.children.length<=2)return;const card=list.querySelector(`[data-option-id="${id}"]`);if(!card)return;const wasChecked=card.querySelector('input[name="correct"]')?.checked;card.remove();window['optImage'+id]='';questionOptionIds=questionOptionIds.filter(x=>x!==id);if(wasChecked){const first=list.querySelector('input[name="correct"]');if(first)first.checked=true;}updateOptionControls();}
+    function uploadBox(label,id){return `<label class="upload"><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'${id}')"><span class="upload-title"><i data-icon="upload"></i><strong>${esc(label)}</strong></span><span class="upload-action">Dosya sec</span></label>`;}
+    function uploadLoadingHtml(label){return `<div class="upload-loading"><div class="upload-loading-head"><span><i data-icon="upload"></i><strong>${esc(label)}</strong></span><small>Yukleniyor</small></div><div class="upload-loading-bar"><i></i></div></div>`;}
+    function previewHtml(url,label,id){return `<div class="preview"><img src="${escAttr(url)}"><button class="btn icon-only bad" onclick="window['${id}']='';this.closest('.preview').outerHTML=uploadBox('${label}','${id}')"><i data-icon="x"></i></button></div>`;}
+    async function uploadImage(input,id){
+      const file=input.files?.[0];if(!file)return;
+      const box=document.getElementById(id.startsWith('opt')?'optImageBox'+id.replace('optImage',''):'qImageBox'), label=id.startsWith('opt')?'Secenek dosyasi':'Soru dosyasi';
+      if(box){box.innerHTML=uploadLoadingHtml(label);paintIcons(box);}
+      const fd=new FormData();fd.append('image',file);
+      try{
+        const res=await fetch('/api/upload',{method:'POST',headers:token?{Authorization:`Bearer ${token}`}:{},body:fd});
+        const d=await res.json();
+        if(!res.ok)throw new Error(d.message||'Dosya yuklenemedi');
+        window[id]=d.url;
+        if(box){box.innerHTML=previewHtml(d.url,label,id);paintIcons(box);}
+      }catch(err){
+        if(box){box.innerHTML=uploadBox(label,id);paintIcons(box);}
+        showToast(err.message||'Dosya yuklenemedi');
+      }
+    }
+    async function addQuestion(){
+      const cards=[...document.querySelectorAll('#optionList .option-card')], selectedId=Number(document.querySelector('input[name="correct"]:checked')?.value), selectedPos=Math.max(0,cards.findIndex(card=>Number(card.dataset.optionId)===selectedId));
+      const questionType=val('questionType')==='open_text'?'open_text':'multiple_choice';
+      const textVal=val('qText').trim(), options=cards.map(card=>val('opt'+card.dataset.optionId).trim()), optionImages=cards.map(card=>window['optImage'+card.dataset.optionId]||''), correctIndex=selectedPos;
+      const method=editingQuestionId?'PATCH':'POST', url=editingQuestionId?`/api/games/${selectedGame._id}/questions/${editingQuestionId}`:`/api/games/${selectedGame._id}/questions`;
+      if(!textVal && !window.qImage)return setErr('questionErr','Soru metni yazin veya dosya secin');
+      if(questionType==='open_text'){
+        const wasEdit=!!editingQuestionId;const res=await apiFetch(url,method,{questionType,text:textVal,imageUrl:window.qImage||'',timeLimit:Number(val('timeLimit'))});const d=await res.json();if(!res.ok)return setErr('questionErr',d.message||'Soru kaydedilemedi');window.qImage='';editingQuestionId=null;showToast(wasEdit?'Soru basariyla guncellendi':'Soru basariyla olusturuldu');await selectGame(selectedGame._id);hostTab='question';renderHostDetail();return;
+      }
+      if(cards.length<2||cards.length>10)return setErr('questionErr','En az 2, en fazla 10 sik olmali');
+      for(let i=0;i<cards.length;i++) if(!options[i] && !optionImages[i]) return setErr('questionErr',`${optionLabel(i)} secenegi icin metin yazin veya dosya secin`);
+      const wasEdit=!!editingQuestionId;const res=await apiFetch(url,method,{questionType,text:textVal,imageUrl:window.qImage||'',options,optionImages,correctIndex,timeLimit:Number(val('timeLimit'))});const d=await res.json();if(!res.ok)return setErr('questionErr',d.message||'Soru kaydedilemedi');window.qImage='';questionOptionIds.forEach(i=>window['optImage'+i]='');editingQuestionId=null;showToast(wasEdit?'Soru basariyla guncellendi':'Soru basariyla olusturuldu');await selectGame(selectedGame._id);hostTab='question';renderHostDetail();
+    }
+    async function renderLeaderboards(){
+      body('<div class="empty">Siralama yukleniyor...</div>');
+      const [lbRes, qsRes]=await Promise.all([apiFetch(`/api/games/${selectedGame._id}/leaderboard`,'GET'),apiFetch(`/api/games/${selectedGame._id}/question-scores`,'GET')]);
+      const lb=lbRes.ok?(await lbRes.json()).leaderboard:[], qs=qsRes.ok?(await qsRes.json()).questions:[];
+      const switcher=`<div class="tabs leader-tabs"><button class="${leaderView==='overall'?'active':''}" onclick="leaderView='overall';selectedScoreOption='';renderLeaderboards()">Genel Siralama</button><button class="${leaderView==='questions'?'active':''}" onclick="leaderView='questions';renderLeaderboards()">Soru Siralamasi</button><button class="${leaderView==='open'?'active':''}" onclick="leaderView='open';selectedScoreOption='';renderLeaderboards()">Acik Uclu</button></div>`;
+      const overall=`<div class="card-list">${lb.map((p,i)=>`<div class="leader-row"><span class="rank">${i+1}</span><b>${esc(p.username)}</b><strong>${p.score} dogru</strong></div>`).join('')||'<div class="empty">Henuz siralama yok.</div>'}</div>`;
+      const choiceQuestions=qs.filter(q=>q.questionType!=='open_text');
+      const openQuestions=qs.filter(q=>q.questionType==='open_text');
+      const questions=`<div class="card-list">${choiceQuestions.map((q,i)=>`<div class="question-tile"><b>${i+1}. ${esc(q.questionText||'(Resimli soru)')}</b>${q.options.map(o=>scoreOption(q,i,o)).join('')}</div>`).join('')||'<div class="empty">Henuz cevaplanan sikli soru yok.</div>'}</div>`;
+      const open=`<div class="card-list">${openQuestions.map((q,i)=>`<div class="question-tile"><b>${i+1}. ${esc(q.questionText||'(Resimli soru)')}</b><div class="option-users">${(q.openAnswers||[]).map((a,j)=>`<div class="leader-row"><span class="rank">${j+1}</span><b>${esc(a.username)}</b><span>${esc(a.answerText||'-')}</span></div>`).join('')||'<div class="empty">Bu soruya cevap verilmedi.</div>'}</div></div>`).join('')||'<div class="empty">Acik uclu soru yok.</div>'}</div>`;
+      body(switcher+(leaderView==='overall'?overall:leaderView==='open'?open:questions)); paintIcons(document.getElementById('hostBody'));
+    }
+    function scoreOption(q,qIndex,o){
+      const key=`${q.questionId}:${o.optionIndex}`, active=selectedScoreOption===key, users=[...(o.users||[])].sort((a,b)=>(a.timeTaken||0)-(b.timeTaken||0));
+      return `<button class="opt option-score ${o.isCorrect?'correct':''} ${active?'active':''}" onclick="toggleScoreOption('${escAttr(key)}')" type="button"><b>${optionLabel(o.optionIndex)}-)</b>${esc(o.optionText||'Resimli secenek')} <span class="small muted">(${users.length})</span></button>${active?`<div class="option-users">${users.map((u,i)=>`<div class="leader-row"><span class="rank">${i+1}</span><b>${esc(u.username)}</b><strong>${((u.timeTaken||0)/1000).toFixed(1)} sn</strong></div>`).join('')||'<div class="empty">Bu sikki secen yok.</div>'}</div>`:''}`;
+    }
+    function toggleScoreOption(key){selectedScoreOption=selectedScoreOption===key?'':key;renderLeaderboards();}
+    async function refreshStats(){if(!selectedGame)return;const res=await apiFetch(`/api/games/${selectedGame._id}/stats`,'GET');if(res.ok){const s=await res.json();selectedGame.status=s.status;selectedGame.answerOpen=s.answerOpen;const el=document.getElementById('statPeople');if(el)el.textContent=s.activeParticipants;}}
+
+    function body(html){document.getElementById('hostBody').innerHTML=html;}
+    function statusText(s){return s==='waiting'?'Bekliyor':s==='started'?'Basladi':'Bitti';}
+    function saveToken(t, remember){token=t;if(remember){localStorage.setItem('token',t);sessionStorage.removeItem('token');}else{sessionStorage.setItem('token',t);localStorage.removeItem('token');}}
+    function clearSession(){token=null;localStorage.removeItem('token');sessionStorage.removeItem('token');}
+    async function apiFetch(url,method,body,extraHeaders={}){
+      const headers = {...(body instanceof FormData ? {} : {'Content-Type':'application/json'}), ...(token ? {Authorization:`Bearer ${token}`} : {}), ...extraHeaders};
+      return fetch(url,{method,headers,body:body ? (body instanceof FormData ? body : JSON.stringify(body)) : undefined});
+    }
+    function val(id){return document.getElementById(id)?.value||'';} function text(id,msg){const el=document.getElementById(id);if(el)el.textContent=msg;} function setErr(id,msg){text(id,msg||'');}
+    function btn(id,loading,html){const el=document.getElementById(id);if(!el)return;el.disabled=loading;el.innerHTML=html;}
+    function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+    function escAttr(s){return esc(s).replace(/`/g,'&#96;');}
+    async function init(){
+      applyTheme(localStorage.getItem('soruCevapTheme') || localStorage.getItem('theme') || document.documentElement.dataset.theme || 'light');
+      paintIcons();
+      try {
+        const info = await fetch('/api/info');
+        if (info.ok) {
+          const data = await info.json();
+          if (Array.isArray(data.webHostUsernames) && data.webHostUsernames.length) webHostUsernames = data.webHostUsernames;
+        }
+      } catch {}
+      const remembered=localStorage.getItem(rememberedNameKey);if(remembered)document.getElementById('loginName').value=remembered;toggleAdminPassword();if(token){try{const res=await apiFetch('/api/auth/me','GET');if(res.ok){currentUser=(await res.json()).user;return bootApp();}}catch{}clearSession();}
+    }
+    init();
+  </script>
+</body>
+</html>
